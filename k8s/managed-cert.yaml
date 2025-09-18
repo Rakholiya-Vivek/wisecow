@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: wisecow-managed-cert
+spec:
+  domains:
+    - vivekr.site

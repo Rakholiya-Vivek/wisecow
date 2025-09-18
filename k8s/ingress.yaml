@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wisecow-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "wisecow-ip"
+    networking.gke.io/managed-certificates: "wisecow-managed-cert"
+spec:
+  rules:
+  - host: vivekr.site
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: wisecow-service
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - vivekr.site
+    secretName: wisecow-tls
