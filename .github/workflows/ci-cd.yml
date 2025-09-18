@@ -27,6 +27,10 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT }}
 
+      - name: Install GKE auth plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin --quiet
+
       - name: Configure Docker to use Artifact Registry
         run: |
           gcloud auth configure-docker ${ARTIFACT_REGISTRY_LOCATION}-docker.pkg.dev -q
@@ -43,16 +47,15 @@ jobs:
 
       - name: Get GKE credentials
         run: |
-          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --region ${{ secrets.GKE_LOCATION }} --project ${{ secrets.GCP_PROJECT }}
+          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} \
+            --region ${{ secrets.GKE_LOCATION }} \
+            --project ${{ secrets.GCP_PROJECT }}
 
       - name: Update k8s manifest with new image and apply
         run: |
-          # replace placeholder in deployment with the newly built image
-          IMAGE_FULL=${{ env.IMAGE }}:${GITHUB_SHA}
-          # Make a copy of manifests to avoid changing repo (optional)
+          IMAGE_FULL=${{ env.IMAGE }}
           mkdir -p tmp_manifests
           cp -r k8s/* tmp_manifests/
-          sed -i "s|us-east1-docker.pkg.dev/PROJECT_ID/wisecow-repo/wisecow:latest|${IMAGE_FULL}|g" tmp_manifests/deployment.yaml || true
+          sed -i "s|us-east1-docker.pkg.dev/PROJECT_ID/wisecow-repo/wisecow:latest|$IMAGE_FULL|g" tmp_manifests/deployment.yaml || true
           kubectl apply -f tmp_manifests/
-          # force rollout to pick up image
-          kubectl set image deployment/wisecow-deployment wisecow=${IMAGE_FULL} --record || true
+          kubectl set image deployment/wisecow-deployment wisecow=$IMAGE_FULL --record || true
