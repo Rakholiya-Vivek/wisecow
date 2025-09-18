@@ -17,7 +17,7 @@ spec:
       containers:
       - name: wisecow
         # replace PROJECT_ID with your GCP project id
-        image: us-east1-docker.pkg.dev/PROJECT_ID/wisecow-repo/wisecow:latest
+        image: us-east1-docker.pkg.dev/vivek-project-465210/wisecow-repo/wisecow:latest
         ports:
         - containerPort: 4499
         livenessProbe:
